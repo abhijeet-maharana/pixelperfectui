@@ -1,15 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Sparkles, Layout, Palette, MessageSquare } from "lucide-react";
+import { Search, Sparkles, Layout, Palette, MessageSquare, ChevronDown } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useGalleryData } from "@/hooks/useGalleryData";
+
+const CATEGORIES_PER_PAGE = 4;
 
 export default function Home() {
   const navigate = useNavigate();
+  const { categories, loading, error } = useGalleryData();
+  const [visibleCategories, setVisibleCategories] = useState(CATEGORIES_PER_PAGE);
 
-  const handleCategoryClick = (category: string) => {
-    navigate(`/gallery?category=${category}`);
+  const handleCategoryClick = (categorySlug: string) => {
+    navigate(`/gallery?category=${categorySlug}`);
+  };
+
+  const handleLoadMore = () => {
+    setVisibleCategories(prev => prev + CATEGORIES_PER_PAGE);
   };
 
   return (
@@ -68,32 +78,60 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-center mb-12">
             Browse Categories
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <CategoryCard
-              image="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=500"
-              title="Dashboard UI"
-              count={24}
-              onClick={() => handleCategoryClick("Dashboard UI")}
-            />
-            <CategoryCard
-              image="https://images.unsplash.com/photo-1492551557933-34265f7af79e?auto=format&fit=crop&q=80&w=500"
-              title="E-commerce"
-              count={18}
-              onClick={() => handleCategoryClick("E-commerce")}
-            />
-            <CategoryCard
-              image="https://images.unsplash.com/photo-1512486130939-2c4f79935e4f?auto=format&fit=crop&q=80&w=500"
-              title="Landing Pages"
-              count={32}
-              onClick={() => handleCategoryClick("Landing Pages")}
-            />
-            <CategoryCard
-              image="https://images.unsplash.com/photo-1526498460520-4c246339dccb?auto=format&fit=crop&q=80&w=500"
-              title="Mobile Apps"
-              count={16}
-              onClick={() => handleCategoryClick("Mobile Apps")}
-            />
-          </div>
+          
+          {loading ? (
+            // Loading state
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <div 
+                  key={i}
+                  className="aspect-[4/3] rounded-lg bg-muted animate-pulse"
+                />
+              ))}
+            </div>
+          ) : error ? (
+            // Error state
+            <div className="text-center text-muted-foreground">
+              <p>Failed to load categories. Please try again later.</p>
+              <Button 
+                variant="outline" 
+                className="mt-4"
+                onClick={() => window.location.reload()}
+              >
+                Retry
+              </Button>
+            </div>
+          ) : (
+            // Categories grid
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {categories.slice(0, visibleCategories).map((category) => (
+                  <CategoryCard
+                    key={category.id}
+                    image={category.image_url}
+                    title={category.name}
+                    count={category.count}
+                    onClick={() => handleCategoryClick(category.slug)}
+                  />
+                ))}
+              </div>
+              
+              {/* Load More Button */}
+              {visibleCategories < categories.length && (
+                <div className="text-center mt-8">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={handleLoadMore}
+                    className="gap-2"
+                  >
+                    Load More Categories
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </section>
 

@@ -3,26 +3,18 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Share2, MessageSquare, ArrowLeft } from "lucide-react";
+import { Heart, Share2, MessageSquare, ArrowLeft, Loader2 } from "lucide-react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { designs } from "@/data/designs";
+import { useDesignDetails } from "@/hooks/useDesignDetails";
 
-export default function DesignDetailClient() {
+export default function DesignDetailPage() {
   const params = useParams();
   const navigate = useNavigate();
-  const [isLiked, setIsLiked] = useState(false);
-
-  const design = designs.find((d) => d.id === Number(params.id));
-
-  // If design is not found, redirect to gallery
-  if (!design) {
-    navigate("/gallery");
-    return null;
-  }
+  const { design, loading, error, isLiked, toggleLike } = useDesignDetails(params.id || '');
 
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent(
-      `Hi! I'm interested in the "${design.title}" design (ID: ${design.id}). Can you provide more information?`
+      `Hi! I'm interested in the "${design?.title}" design (ID: ${design?.id}). Can you provide more information?`
     );
     window.open(`https://wa.me/1234567890?text=${message}`, "_blank");
   };
@@ -31,8 +23,8 @@ export default function DesignDetailClient() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: design.title,
-          text: design.description,
+          title: design?.title,
+          text: design?.description,
           url: window.location.href,
         });
       } catch (error) {
@@ -41,6 +33,33 @@ export default function DesignDetailClient() {
     }
   };
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading design details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error || !design) {
+    return (
+      <div className="min-h-screen py-12 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Design not found</h2>
+          <p className="text-muted-foreground mb-6">
+            {error || "The design you're looking for doesn't exist."}
+          </p>
+          <Button onClick={() => navigate("/gallery")}>Back to Gallery</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-background pb-24 md:pb-0">
       {/* Header */}
@@ -48,7 +67,7 @@ export default function DesignDetailClient() {
         <div className="container px-4 mx-auto">
           <div className="flex items-center justify-between h-14 md:h-16">
             <Link
-              href="/gallery"
+              to="/gallery"
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm md:text-base"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -60,7 +79,7 @@ export default function DesignDetailClient() {
                 variant="ghost"
                 size="icon"
                 className="rounded-full h-8 w-8 md:h-10 md:w-10"
-                onClick={() => setIsLiked(!isLiked)}
+                onClick={toggleLike}
               >
                 <Heart
                   className={`w-4 h-4 md:w-5 md:h-5 ${
@@ -97,15 +116,15 @@ export default function DesignDetailClient() {
               {design.title}
             </h1>
             <div className="flex flex-wrap gap-2 md:gap-3 mb-4 md:mb-6">
-              <Badge variant="secondary">{design.category}</Badge>
-              <Badge variant="secondary">{design.style}</Badge>
-              <Badge variant="secondary">{design.industry}</Badge>
+              <Badge variant="secondary">{design.category?.name}</Badge>
+              <Badge variant="secondary">{design.style?.name}</Badge>
+              <Badge variant="secondary">{design.industry?.name}</Badge>
             </div>
             <p className="text-base md:text-lg text-muted-foreground mb-4 md:mb-6">
               {design.description}
             </p>
             <div className="flex flex-wrap gap-2 mb-4 md:mb-6">
-              {design.tags.map((tag) => (
+              {design.tags?.map((tag) => (
                 <Badge key={tag} variant="outline">
                   {tag}
                 </Badge>
@@ -114,7 +133,7 @@ export default function DesignDetailClient() {
             <div className="flex flex-wrap items-center gap-2 md:gap-4 text-sm text-muted-foreground">
               <span>By {design.designer}</span>
               <span className="hidden md:inline">•</span>
-              <span>{new Date(design.created).toLocaleDateString()}</span>
+              <span>{new Date(design.created_at).toLocaleDateString()}</span>
               <span className="hidden md:inline">•</span>
               <span>{design.likes} likes</span>
             </div>
@@ -124,13 +143,13 @@ export default function DesignDetailClient() {
           <div className="space-y-6 md:space-y-8">
             <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-secondary">
               <img
-                src={design.image}
+                src={design.image_url}
                 alt={design.title}
                 className="w-full h-full object-cover"
               />
             </div>
 
-            {design.additionalImages.map((image, index) => (
+            {design.additional_images?.map((image, index) => (
               <div
                 key={index}
                 className="relative aspect-[16/9] rounded-lg overflow-hidden bg-secondary"

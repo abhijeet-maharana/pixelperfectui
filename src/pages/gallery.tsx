@@ -1,60 +1,119 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, SlidersHorizontal, Eye } from "lucide-react";
-import { Link, useSearchParams } from "react-router-dom";
-import { designs } from "@/data/designs";
-
-const categories = [
-  "All",
-  "Dashboard UI",
-  "E-commerce",
-  "Landing Pages",
-  "Mobile Apps",
-];
-const styles = ["All", "Minimal", "Modern", "Bold", "Playful"];
-const industries = [
-  "All",
-  "SaaS",
-  "Retail",
-  "Technology",
-  "Healthcare",
-  "Finance",
-];
+import { Search, SlidersHorizontal, Eye, Loader2 } from "lucide-react";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { useGalleryData } from "@/hooks/useGalleryData";
 
 export default function GalleryPage() {
-  const [searchParams] = useSearchParams();
-  const categoryFromUrl = searchParams.get("category");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { 
+    categories, 
+    styles, 
+    industries, 
+    designs, 
+    loading, 
+    error,
+    hasMore,
+    loadMore 
+  } = useGalleryData();
 
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedStyle, setSelectedStyle] = useState("All");
-  const [selectedIndustry, setSelectedIndustry] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
+  // Get filter values from URL params
+  const categoryParam = searchParams.get("category") || "All";
+  const styleParam = searchParams.get("style") || "All";
+  const industryParam = searchParams.get("industry") || "All";
+  const searchQuery = searchParams.get("q") || "";
+  const showFilters = searchParams.get("filters") === "true";
 
-  // Set the category from URL when component mounts
-  useEffect(() => {
-    if (categoryFromUrl && categories.includes(categoryFromUrl)) {
-      setSelectedCategory(categoryFromUrl);
-      setShowFilters(true);
-    }
-  }, [categoryFromUrl]);
+  // Intersection Observer for infinite loading
+  const observer = useRef<IntersectionObserver>();
+  const lastDesignElementRef = useCallback((node: HTMLDivElement | null) => {
+    if (loading) return;
+    
+    if (observer.current) observer.current.disconnect();
+    
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        loadMore();
+      }
+    });
+    
+    if (node) observer.current.observe(node);
+  }, [loading, hasMore, loadMore]);
 
+  // Update URL params when filters change
+  const updateFilters = (updates: Record<string, string>) => {
+    const newParams = new URLSearchParams(searchParams);
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value && value !== "All") {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
+    });
+    setSearchParams(newParams);
+  };
+
+  // Filter designs based on URL params
   const filteredDesigns = designs.filter((design) => {
     const matchesCategory =
-      selectedCategory === "All" || design.category === selectedCategory;
+      categoryParam === "All" || design.category?.name === categoryParam;
     const matchesStyle =
-      selectedStyle === "All" || design.style === selectedStyle;
+      styleParam === "All" || design.style?.name === styleParam;
     const matchesIndustry =
-      selectedIndustry === "All" || design.industry === selectedIndustry;
-    const matchesSearch = design.title
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
+      industryParam === "All" || design.industry?.name === industryParam;
+    const matchesSearch =
+      !searchQuery ||
+      design.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      design.description?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesStyle && matchesIndustry && matchesSearch;
   });
+
+  // Toggle filters visibility
+  const toggleFilters = () => {
+    const newParams = new URLSearchParams(searchParams);
+    if (showFilters) {
+      newParams.delete("filters");
+    } else {
+      newParams.set("filters", "true");
+    }
+    setSearchParams(newParams);
+  };
+
+  // Handle search input
+  const handleSearch = (value: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (value) {
+      newParams.set("q", value);
+    } else {
+      newParams.delete("q");
+    }
+    setSearchParams(newParams);
+  };
+
+  // Set initial category from URL if provided
+  useEffect(() => {
+    const categoryFromUrl = searchParams.get("category");
+    if (categoryFromUrl && categories.some(c => c.name === categoryFromUrl)) {
+      updateFilters({ category: categoryFromUrl });
+    }
+  }, [categories]);
+
+  if (error) {
+    return (
+      <div className="min-h-screen py-12 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Failed to load gallery data</h2>
+          <p className="text-muted-foreground mb-6">{error}</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen py-6 md:py-12 bg-background">
@@ -68,13 +127,13 @@ export default function GalleryPage() {
                 placeholder="Search designs..."
                 className="pl-10"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearch(e.target.value)}
               />
             </div>
             <Button
               variant="outline"
               className="gap-2"
-              onClick={() => setShowFilters(!showFilters)}
+              onClick={toggleFilters}
             >
               <SlidersHorizontal className="w-4 h-4" />
               Filters
@@ -89,16 +148,24 @@ export default function GalleryPage() {
                   Category:
                 </span>
                 <div className="flex flex-wrap gap-2">
+                  <Badge
+                    key="all-categories"
+                    variant={categoryParam === "All" ? "default" : "outline"}
+                    className="cursor-pointer"
+                    onClick={() => updateFilters({ category: "All" })}
+                  >
+                    All
+                  </Badge>
                   {categories.map((category) => (
                     <Badge
-                      key={category}
+                      key={category.id}
                       variant={
-                        selectedCategory === category ? "default" : "outline"
+                        categoryParam === category.name ? "default" : "outline"
                       }
                       className="cursor-pointer"
-                      onClick={() => setSelectedCategory(category)}
+                      onClick={() => updateFilters({ category: category.name })}
                     >
-                      {category}
+                      {category.name}
                     </Badge>
                   ))}
                 </div>
@@ -108,14 +175,24 @@ export default function GalleryPage() {
                   Style:
                 </span>
                 <div className="flex flex-wrap gap-2">
+                  <Badge
+                    key="all-styles"
+                    variant={styleParam === "All" ? "default" : "outline"}
+                    className="cursor-pointer"
+                    onClick={() => updateFilters({ style: "All" })}
+                  >
+                    All
+                  </Badge>
                   {styles.map((style) => (
                     <Badge
-                      key={style}
-                      variant={selectedStyle === style ? "default" : "outline"}
+                      key={style.id}
+                      variant={
+                        styleParam === style.name ? "default" : "outline"
+                      }
                       className="cursor-pointer"
-                      onClick={() => setSelectedStyle(style)}
+                      onClick={() => updateFilters({ style: style.name })}
                     >
-                      {style}
+                      {style.name}
                     </Badge>
                   ))}
                 </div>
@@ -125,16 +202,24 @@ export default function GalleryPage() {
                   Industry:
                 </span>
                 <div className="flex flex-wrap gap-2">
+                  <Badge
+                    key="all-industries"
+                    variant={industryParam === "All" ? "default" : "outline"}
+                    className="cursor-pointer"
+                    onClick={() => updateFilters({ industry: "All" })}
+                  >
+                    All
+                  </Badge>
                   {industries.map((industry) => (
                     <Badge
-                      key={industry}
+                      key={industry.id}
                       variant={
-                        selectedIndustry === industry ? "default" : "outline"
+                        industryParam === industry.name ? "default" : "outline"
                       }
                       className="cursor-pointer"
-                      onClick={() => setSelectedIndustry(industry)}
+                      onClick={() => updateFilters({ industry: industry.name })}
                     >
-                      {industry}
+                      {industry.name}
                     </Badge>
                   ))}
                 </div>
@@ -144,34 +229,76 @@ export default function GalleryPage() {
         </div>
 
         {/* Gallery Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {filteredDesigns.map((design) => (
-            <Link to={`/gallery/${design.id}`} key={design.id}>
-              <div className="group relative aspect-[4/3] rounded-lg overflow-hidden bg-secondary">
-                <img
-                  src={design.image}
-                  alt={design.title}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
-                    <h3 className="text-lg md:text-xl font-semibold text-white mb-2">
-                      {design.title}
-                    </h3>
-                    <div className="flex flex-wrap gap-2 mb-3 md:mb-4">
-                      <Badge variant="secondary">{design.category}</Badge>
-                      <Badge variant="secondary">{design.style}</Badge>
+        {loading && designs.length === 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {[...Array(6)].map((_, index) => (
+              <div
+                key={index}
+                className="aspect-[4/3] rounded-lg bg-muted animate-pulse"
+              />
+            ))}
+          </div>
+        ) : filteredDesigns.length === 0 ? (
+          <div className="text-center py-12">
+            <h3 className="text-lg font-semibold mb-2">No designs found</h3>
+            <p className="text-muted-foreground mb-4">
+              Try adjusting your filters or search query
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearchParams(new URLSearchParams());
+              }}
+            >
+              Clear All Filters
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              {filteredDesigns.map((design, index) => (
+                <div
+                  key={design.id}
+                  ref={index === filteredDesigns.length - 1 ? lastDesignElementRef : null}
+                >
+                  <Link to={`/gallery/${design.id}`}>
+                    <div className="group relative aspect-[4/3] rounded-lg overflow-hidden bg-secondary">
+                      <img
+                        src={design.image_url}
+                        alt={design.title}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
+                          <h3 className="text-lg md:text-xl font-semibold text-white mb-2">
+                            {design.title}
+                          </h3>
+                          <div className="flex flex-wrap gap-2 mb-3 md:mb-4">
+                            <Badge variant="secondary">
+                              {design.category?.name}
+                            </Badge>
+                            <Badge variant="secondary">{design.style?.name}</Badge>
+                          </div>
+                          <Button variant="secondary" size="sm" className="gap-2">
+                            <Eye className="w-4 h-4" />
+                            View Design
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                    <Button variant="secondary" size="sm" className="gap-2">
-                      <Eye className="w-4 h-4" />
-                      View Design
-                    </Button>
-                  </div>
+                  </Link>
                 </div>
+              ))}
+            </div>
+            
+            {/* Loading indicator */}
+            {loading && (
+              <div className="flex justify-center mt-8">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
               </div>
-            </Link>
-          ))}
-        </div>
+            )}
+          </>
+        )}
       </div>
     </main>
   );
