@@ -58,3 +58,13 @@ export interface BlogPost {
     avatar_url: string;
   };
 }
+
+export interface Comment {
+  id: string;
+  post_id: string;
+  author_name: string;
+  author_email: string;
+  content: string;
+  created_at: string;
+  replies?: Comment[];
+}

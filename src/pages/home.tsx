@@ -3,7 +3,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Sparkles, Layout, Palette, MessageSquare, ChevronDown } from "lucide-react";
+import {
+  Search,
+  Sparkles,
+  Layout,
+  Palette,
+  MessageSquare,
+  ChevronDown,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useGalleryData } from "@/hooks/useGalleryData";
 
@@ -12,14 +19,16 @@ const CATEGORIES_PER_PAGE = 4;
 export default function Home() {
   const navigate = useNavigate();
   const { categories, loading, error } = useGalleryData();
-  const [visibleCategories, setVisibleCategories] = useState(CATEGORIES_PER_PAGE);
+  const [visibleCategories, setVisibleCategories] =
+    useState(CATEGORIES_PER_PAGE);
 
-  const handleCategoryClick = (categorySlug: string) => {
-    navigate(`/gallery?category=${categorySlug}`);
+  const handleCategoryClick = (categoryName: string) => {
+    // Navigate to gallery with category filter
+    navigate(`/gallery?category=${encodeURIComponent(categoryName)}`);
   };
 
   const handleLoadMore = () => {
-    setVisibleCategories(prev => prev + CATEGORIES_PER_PAGE);
+    setVisibleCategories((prev) => prev + CATEGORIES_PER_PAGE);
   };
 
   return (
@@ -78,12 +87,12 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-center mb-12">
             Browse Categories
           </h2>
-          
+
           {loading ? (
             // Loading state
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[...Array(4)].map((_, i) => (
-                <div 
+                <div
                   key={i}
                   className="aspect-[4/3] rounded-lg bg-muted animate-pulse"
                 />
@@ -93,8 +102,8 @@ export default function Home() {
             // Error state
             <div className="text-center text-muted-foreground">
               <p>Failed to load categories. Please try again later.</p>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="mt-4"
                 onClick={() => window.location.reload()}
               >
@@ -111,11 +120,11 @@ export default function Home() {
                     image={category.image_url}
                     title={category.name}
                     count={category.count}
-                    onClick={() => handleCategoryClick(category.slug)}
+                    onClick={() => handleCategoryClick(category.name)}
                   />
                 ))}
               </div>
-              
+
               {/* Load More Button */}
               {visibleCategories < categories.length && (
                 <div className="text-center mt-8">

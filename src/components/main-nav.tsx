@@ -20,6 +20,11 @@ export function MainNav() {
       label: "Gallery",
       active: location.pathname === "/gallery",
     },
+    {
+      href: "/blog",
+      label: "Blog",
+      active: location.pathname === "/blog",
+    },
   ];
 
   return (
@@ -28,7 +33,7 @@ export function MainNav() {
         <Link to="/" className="font-semibold text-lg whitespace-nowrap">
           PixelPerfectUI
         </Link>
-        
+
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
           {routes.map((route) => (
