@@ -10,7 +10,9 @@ import { useDesignDetails } from "@/hooks/useDesignDetails";
 export default function DesignDetailPage() {
   const params = useParams();
   const navigate = useNavigate();
-  const { design, loading, error, isLiked, toggleLike } = useDesignDetails(params.id || '');
+  const { design, loading, error, isLiked, toggleLike } = useDesignDetails(
+    params.id || ""
+  );
 
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent(

@@ -1,5 +1,3 @@
-import { Database } from './database.types';
-
 export interface Category {
   id: string;
   name: string;

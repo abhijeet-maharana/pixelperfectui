@@ -106,7 +106,7 @@ export default function BlogPostClient() {
         <div className="absolute top-0 left-0 right-0 p-4">
           <div className="container">
             <Link
-              href="/blog"
+              to="/blog"
               className="inline-flex items-center text-white hover:text-white/80 transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -149,17 +149,7 @@ export default function BlogPostClient() {
                 <ReactMarkdown
                   components={{
                     // Style code blocks
-                    code: ({ node, inline, className, children, ...props }) => {
-                      if (inline) {
-                        return (
-                          <code
-                            className="bg-muted px-1.5 py-0.5 rounded-md"
-                            {...props}
-                          >
-                            {children}
-                          </code>
-                        );
-                      }
+                    code: ({ node, className, children, ...props }) => {
                       return (
                         <div className="relative">
                           <pre className="bg-muted p-4 rounded-lg overflow-x-auto">
@@ -276,7 +266,7 @@ export default function BlogPostClient() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {relatedPosts.map((relatedPost) => (
                       <Link
-                        href={`/blog/${relatedPost.id}`}
+                        to={`/blog/${relatedPost.id}`}
                         key={relatedPost.id}
                         className="group"
                       >
