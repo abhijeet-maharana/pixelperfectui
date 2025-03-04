@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Menu, X, ExternalLink } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -36,25 +37,25 @@ export function Navbar() {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8">
           <Link
-            href="#services"
+            href="/#services"
             className="text-foreground/80 hover:text-foreground transition-colors"
           >
             Services
           </Link>
           <Link
-            href="#work"
+            href="/#work"
             className="text-foreground/80 hover:text-foreground transition-colors"
           >
             Our Work
           </Link>
           <Link
-            href="#pricing"
+            href="/#pricing"
             className="text-foreground/80 hover:text-foreground transition-colors"
           >
             Pricing
           </Link>
           <Link
-            href="#process"
+            href="/#process"
             className="text-foreground/80 hover:text-foreground transition-colors"
           >
             Process
@@ -66,13 +67,13 @@ export function Navbar() {
             Blog
           </Link>
           <Link
-            href="#contact"
+            href="/#contact"
             className="text-foreground/80 hover:text-foreground transition-colors"
           >
             Contact
           </Link>
           <Link
-            href="https://webscraper.example.com"
+            href="https://scrape.pixelperfectui.com/"
             className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1"
             target="_blank"
             rel="noopener noreferrer"
@@ -84,7 +85,13 @@ export function Navbar() {
 
         <div className="flex items-center gap-4">
           <ThemeToggle />
-          <Button className="hidden md:flex">Get Started</Button>
+          <Link
+            href="http://wa.me/+917008954962"
+            target="_blank"
+            className={cn(buttonVariants(), "hidden md:flex")}
+          >
+            Message us
+          </Link>
           <Button
             variant="ghost"
             size="icon"
@@ -147,7 +154,7 @@ export function Navbar() {
               Contact
             </Link>
             <Link
-              href="https://webscraper.example.com"
+              href="https://scrape.pixelperfectui.com/"
               className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-1"
               target="_blank"
               rel="noopener noreferrer"
@@ -156,9 +163,13 @@ export function Navbar() {
               Web Scraping
               <ExternalLink className="h-3 w-3" />
             </Link>
-            <Button className="mt-2" onClick={() => setIsMobileMenuOpen(false)}>
-              Get Started
-            </Button>
+            <Link
+              href="http://wa.me/+917008954962"
+              target="_blank"
+              className={cn(buttonVariants(), "mt-2")}
+            >
+              Message us
+            </Link>
           </nav>
         </div>
       )}

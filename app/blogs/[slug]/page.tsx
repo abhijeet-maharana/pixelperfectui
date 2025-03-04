@@ -1,7 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, Clock, User, Tag } from "lucide-react";
 
@@ -10,14 +8,16 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   // For this example, we'll use hardcoded data
   const blogPost = {
     id: params.slug,
-    title: params.slug === "responsive-design-2025" 
-      ? "Responsive Design Trends for 2025" 
-      : "The Ultimate Guide to Modern Web Development",
+    title:
+      params.slug === "responsive-design-2025"
+        ? "Responsive Design Trends for 2025"
+        : "The Ultimate Guide to Modern Web Development",
     date: "May 15, 2025",
     author: "Priya Sharma",
     category: "Design",
     readTime: "5 min read",
-    image: "https://images.unsplash.com/photo-1547658719-da2b51169166?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1528&q=80",
+    image:
+      "https://images.unsplash.com/photo-1547658719-da2b51169166?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1528&q=80",
     content: `
       <p class="mb-4">The landscape of web design is constantly evolving, and staying ahead of the curve is essential for businesses that want to maintain a competitive edge. As we look toward 2025, several responsive design trends are emerging that promise to reshape how users interact with websites across devices.</p>
       
@@ -74,7 +74,7 @@ body {
       <h2 class="text-2xl font-bold mt-8 mb-4">Conclusion</h2>
       <p class="mb-4">The responsive design trends of 2025 are moving beyond the basic principles of flexible grids and media queries toward a more holistic approach that considers device capabilities, user preferences, and contextual factors. By embracing these trends, designers and developers can create web experiences that truly adapt to users' needs across an increasingly diverse digital landscape.</p>
       <p class="mb-4">As you plan your website redesign or new project, consider how these responsive design trends might enhance your users' experience and keep your digital presence feeling fresh and modern in the years to come.</p>
-    `
+    `,
   };
 
   // Related posts
@@ -83,25 +83,27 @@ body {
       id: "web-animation-techniques",
       title: "Advanced Web Animation Techniques Using GSAP",
       date: "April 10, 2025",
-      image: "https://images.unsplash.com/photo-1550063873-ab792950096b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+      image:
+        "https://images.unsplash.com/photo-1550063873-ab792950096b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
     },
     {
       id: "website-performance-optimization",
       title: "Website Performance Optimization: A Complete Guide",
       date: "March 5, 2025",
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1426&q=80"
+      image:
+        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1426&q=80",
     },
     {
       id: "ai-web-design",
       title: "How AI is Transforming Web Design in 2025",
       date: "February 18, 2025",
-      image: "https://images.unsplash.com/photo-1677442135136-760c813a743d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1632&q=80"
-    }
+      image:
+        "https://images.unsplash.com/photo-1677442135136-760c813a743d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1632&q=80",
+    },
   ];
 
   return (
     <>
-      <Navbar />
       <div className="pt-24 pb-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
@@ -140,15 +142,24 @@ body {
               </div>
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-bold mb-8">{blogPost.title}</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-8">
+              {blogPost.title}
+            </h1>
 
-            <div className="prose prose-lg dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: blogPost.content }} />
+            <div
+              className="prose prose-lg dark:prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: blogPost.content }}
+            />
 
             <div className="border-t border-border mt-16 pt-16">
               <h2 className="text-2xl font-bold mb-8">Related Articles</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {relatedPosts.map((post) => (
-                  <Link key={post.id} href={`/blogs/${post.id}`} className="group">
+                  <Link
+                    key={post.id}
+                    href={`/blogs/${post.id}`}
+                    className="group"
+                  >
                     <div className="relative h-48 w-full rounded-lg overflow-hidden mb-4">
                       <Image
                         src={post.image}
@@ -157,8 +168,12 @@ body {
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     </div>
-                    <h3 className="font-medium group-hover:text-primary transition-colors">{post.title}</h3>
-                    <p className="text-sm text-muted-foreground mt-2">{post.date}</p>
+                    <h3 className="font-medium group-hover:text-primary transition-colors">
+                      {post.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {post.date}
+                    </p>
                   </Link>
                 ))}
               </div>
@@ -166,7 +181,6 @@ body {
           </div>
         </div>
       </div>
-      <Footer />
     </>
   );
 }

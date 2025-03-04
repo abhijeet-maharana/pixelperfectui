@@ -1,4 +1,3 @@
-import { Navbar } from "@/components/navbar";
 import { HeroSection } from "@/components/hero-section";
 import { ServicesSection } from "@/components/services-section";
 import { WorkSection } from "@/components/work-section";
@@ -11,8 +10,7 @@ import { Footer } from "@/components/footer";
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
-      <Navbar />
+    <>
       <HeroSection />
       <ServicesSection />
       <WorkSection />
@@ -21,7 +19,6 @@ export default function Home() {
       <ProcessSection />
       <TechStackSection />
       <ContactSection />
-      <Footer />
-    </main>
+    </>
   );
 }
