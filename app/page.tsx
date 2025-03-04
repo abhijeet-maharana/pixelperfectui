@@ -6,7 +6,6 @@ import { PricingSection } from "@/components/pricing-section";
 import { ProcessSection } from "@/components/process-section";
 import { ContactSection } from "@/components/contact-section";
 import { TechStackSection } from "@/components/tech-stack-section";
-import { Footer } from "@/components/footer";
 
 export default function Home() {
   return (
